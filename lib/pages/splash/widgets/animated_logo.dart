@@ -18,6 +18,8 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
   var _logoHeight = 180.0;
   double _transformProgress = 0;
   double _translateProgress = 0;
+  double _centerDotRadius = 25;
+  double _strokeWidth = 5;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,7 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
               painter: LogoOutlinePainter(
                 logoWidth: _logoWidth,
                 logoHeight: _logoHeight,
+                strokeWidth: _translateProgress == 1 ? 1 : _strokeWidth,
               ),
               child: Container(),
             ),
@@ -56,6 +59,16 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
               painter: Line3Painter(
                 logoWidth: _logoWidth,
                 logoHeight: _logoHeight,
+                transformProgress: _transformProgress,
+                translateProgress: _translateProgress,
+              ),
+              child: Container(),
+            ),
+            CustomPaint(
+              painter: CenterDotPainter(
+                logoWidth: _logoWidth,
+                logoHeight: _logoHeight,
+                radius: _centerDotRadius,
                 transformProgress: _transformProgress,
                 translateProgress: _translateProgress,
               ),
@@ -93,14 +106,19 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
 class LogoOutlinePainter extends CustomPainter {
   final double logoWidth;
   final double logoHeight;
+  final double strokeWidth;
 
-  LogoOutlinePainter({this.logoWidth = 0, this.logoHeight = 0});
+  LogoOutlinePainter({
+    this.logoWidth = 0,
+    this.logoHeight = 0,
+    this.strokeWidth = 5,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
     var paint = Paint()
       ..color = Colors.white
-      ..strokeWidth = 5
+      ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.square;
 
@@ -131,8 +149,8 @@ class LogoOutlinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(LogoOutlinePainter oldDelegate) {
+    return oldDelegate.strokeWidth != strokeWidth;
   }
 }
 
@@ -385,6 +403,163 @@ class Line3Painter extends CustomPainter {
 
   @override
   bool shouldRepaint(Line3Painter oldDelegate) {
+    return oldDelegate.transformProgress != transformProgress ||
+        oldDelegate.translateProgress != translateProgress;
+  }
+}
+
+class CenterDotPainter extends CustomPainter {
+  final double logoWidth;
+  final double logoHeight;
+  final double transformProgress;
+  final double translateProgress;
+  final double radius;
+
+  CenterDotPainter({
+    this.logoWidth = 0,
+    this.logoHeight = 0,
+    this.transformProgress = 0,
+    this.translateProgress = 0,
+    this.radius = 0,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    var paint = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    var paint_2 = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    var paint_3 = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    var paint_4 = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+    var paint_5 = Paint()
+      ..color = Colors.white
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    Offset center = Offset(size.width / 2, size.height / 2);
+
+    /// helper coordinates -----------------------------------
+    double outLineX1 = center.dx - logoWidth / 2;
+    double outLineY1 = center.dy - logoWidth / 2;
+    double outLineX2 = center.dx + logoWidth / 2;
+    double outLineY2 = center.dy - logoWidth / 2;
+    double outLineX3 = center.dx + logoWidth / 2;
+    double outLineY3 = center.dy - logoWidth / 2 + logoHeight * 1.6 / 3;
+    double outLineX4 = center.dx;
+    double outLineY4 = center.dy - logoWidth / 2 + logoHeight * 0.8;
+    double outLineX5 = center.dx - logoWidth / 2;
+    double outLineY5 = center.dy - logoWidth / 2 + logoHeight * 1.6 / 3;
+
+    /// Drawing Dot 1 ----------------------------------------
+    double dot1X1 = center.dx;
+    double dot1Y1 = center.dy;
+    canvas.drawCircle(
+        Offset(dot1X1, dot1Y1), radius, paint..style = PaintingStyle.stroke);
+
+    double circleEdgePointX1 = center.dx;
+    double circleEdgePointY1 = center.dy;
+    double circleEdgePointX2 = center.dx;
+    double circleEdgePointY2 = center.dy;
+    double circleEdgePointX3 = center.dx;
+    double circleEdgePointY3 = center.dy;
+    double circleEdgePointX4 = center.dx;
+    double circleEdgePointY4 = center.dy;
+    double circleEdgePointX5 = center.dx;
+    double circleEdgePointY5 = center.dy;
+
+    var path_1 = Path();
+    var path_2 = Path();
+    var path_3 = Path();
+    var path_4 = Path();
+    var path_5 = Path();
+
+    path_1.moveTo(circleEdgePointX1, circleEdgePointY1);
+    path_1.lineTo(outLineX1, outLineY1);
+
+    path_2.moveTo(circleEdgePointX2, circleEdgePointY2);
+    path_2.lineTo(outLineX2, outLineY2);
+
+    path_3.moveTo(circleEdgePointX3, circleEdgePointY3);
+    path_3.lineTo(outLineX3, outLineY3);
+
+    path_4.moveTo(circleEdgePointX4, circleEdgePointY4);
+    path_4.lineTo(outLineX4, outLineY4);
+
+    path_5.moveTo(circleEdgePointX5, circleEdgePointY5);
+    path_5.lineTo(outLineX5, outLineY5);
+
+    /// trace path animation
+    PathMetric pathMetric_1 = path_1.computeMetrics().first;
+    PathMetric pathMetric_2 = path_2.computeMetrics().first;
+    PathMetric pathMetric_3 = path_3.computeMetrics().first;
+    PathMetric pathMetric_4 = path_4.computeMetrics().first;
+    PathMetric pathMetric_5 = path_5.computeMetrics().first;
+
+    /// tracing path to center animation
+    try {
+      Path extractPath_1 = pathMetric_1.extractPath(
+          0.0, pathMetric_1.length * translateProgress);
+      Path extractPath_2 = pathMetric_2.extractPath(
+          0.0, pathMetric_2.length * translateProgress);
+      Path extractPath_3 = pathMetric_3.extractPath(
+          0.0, pathMetric_3.length * translateProgress);
+      Path extractPath_4 = pathMetric_4.extractPath(
+          0.0, pathMetric_4.length * translateProgress);
+      Path extractPath_5 = pathMetric_5.extractPath(
+          0.0, pathMetric_5.length * translateProgress);
+      var metric_1 = extractPath_1.computeMetrics().first;
+      var metric_2 = extractPath_2.computeMetrics().first;
+      var metric_3 = extractPath_3.computeMetrics().first;
+      var metric_4 = extractPath_4.computeMetrics().first;
+      var metric_5 = extractPath_5.computeMetrics().first;
+
+      final offset_1 = metric_1.getTangentForOffset(metric_1.length)!.position;
+      final offset_2 = metric_2.getTangentForOffset(metric_1.length)!.position;
+      final offset_3 = metric_3.getTangentForOffset(metric_1.length)!.position;
+      final offset_4 = metric_4.getTangentForOffset(metric_1.length)!.position;
+      final offset_5 = metric_5.getTangentForOffset(metric_1.length)!.position;
+
+      /// drawing line 1 to corner 1 with end point
+      canvas.drawPath(extractPath_1, paint);
+      canvas.drawCircle(offset_1, 3, paint..style = PaintingStyle.fill);
+
+      /// drawing line 2 to corner 2 with end point
+      canvas.drawPath(extractPath_2, paint_2);
+      canvas.drawCircle(offset_2, 3, paint_2..style = PaintingStyle.fill);
+
+      /// drawing line 3 to corner 3 with end point
+      canvas.drawPath(extractPath_3, paint_3);
+      canvas.drawCircle(offset_3, 3, paint_3..style = PaintingStyle.fill);
+
+      /// drawing line 4 to corner 4 with end point
+      canvas.drawPath(extractPath_4, paint_4);
+      canvas.drawCircle(offset_4, 3, paint_4..style = PaintingStyle.fill);
+
+      /// drawing line 5 to corner 5 with end point
+      canvas.drawPath(extractPath_5, paint_5);
+      canvas.drawCircle(offset_5, 3, paint_5..style = PaintingStyle.fill);
+    } catch (e) {
+      print("error $e");
+    }
+  }
+
+  @override
+  bool shouldRepaint(CenterDotPainter oldDelegate) {
     return oldDelegate.transformProgress != transformProgress ||
         oldDelegate.translateProgress != translateProgress;
   }
