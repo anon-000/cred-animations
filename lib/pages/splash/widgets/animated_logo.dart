@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 
 ///
 /// Created by Auro (auro@smarttersstudio.com) on 13/08/21 at 11:11 pm
@@ -17,7 +16,7 @@ class AnimatedLogo extends StatefulWidget {
 class _AnimatedLogoState extends State<AnimatedLogo> {
   var _logoWidth = 130.0;
   var _logoHeight = 180.0;
-  double val = 0;
+  double _transformProgress = 0;
   double _translateProgress = 0;
 
   @override
@@ -29,7 +28,7 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
         Stack(
           children: [
             CustomPaint(
-              painter: ShapePainter(
+              painter: LogoOutlinePainter(
                 logoWidth: _logoWidth,
                 logoHeight: _logoHeight,
               ),
@@ -39,7 +38,7 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
               painter: Line1Painter(
                 logoWidth: _logoWidth,
                 logoHeight: _logoHeight,
-                progress: val,
+                transformProgress: _transformProgress,
                 translateProgress: _translateProgress,
               ),
               child: Container(),
@@ -48,7 +47,7 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
               painter: Line2Painter(
                 logoWidth: _logoWidth,
                 logoHeight: _logoHeight,
-                progress: val,
+                transformProgress: _transformProgress,
                 translateProgress: _translateProgress,
               ),
               child: Container(),
@@ -57,7 +56,7 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
               painter: Line3Painter(
                 logoWidth: _logoWidth,
                 logoHeight: _logoHeight,
-                progress: val,
+                transformProgress: _transformProgress,
                 translateProgress: _translateProgress,
               ),
               child: Container(),
@@ -65,16 +64,16 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
           ],
         ),
         Text(
-          "$val : $_translateProgress",
+          "$_transformProgress : $_translateProgress",
           style: TextStyle(color: Colors.white),
         ),
         Slider(
-            value: val,
+            value: _transformProgress,
             min: 0,
             max: 1,
             onChanged: (v) {
               setState(() {
-                val = v;
+                _transformProgress = v;
               });
             }),
         Slider(
@@ -91,12 +90,11 @@ class _AnimatedLogoState extends State<AnimatedLogo> {
   }
 }
 
-// FOR PAINTING POLYGONS
-class ShapePainter extends CustomPainter {
+class LogoOutlinePainter extends CustomPainter {
   final double logoWidth;
   final double logoHeight;
 
-  ShapePainter({this.logoWidth = 0, this.logoHeight = 0});
+  LogoOutlinePainter({this.logoWidth = 0, this.logoHeight = 0});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -141,14 +139,15 @@ class ShapePainter extends CustomPainter {
 class Line1Painter extends CustomPainter {
   final double logoWidth;
   final double logoHeight;
-  final double progress;
-  final double? translateProgress;
+  final double transformProgress;
+  final double translateProgress;
 
-  Line1Painter(
-      {this.logoWidth = 0,
-      this.logoHeight = 0,
-      this.progress = 0,
-      this.translateProgress});
+  Line1Painter({
+    this.logoWidth = 0,
+    this.logoHeight = 0,
+    this.transformProgress = 0,
+    this.translateProgress = 0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -168,48 +167,43 @@ class Line1Painter extends CustomPainter {
     double line1Y2 = center.dy - logoWidth / 2 + 15;
     double line1X3 = center.dx + logoWidth / 2 - 15;
     double line1Y3 = center.dy - logoWidth / 2 + 15 + logoHeight * 0.18;
-    // path.moveTo(line1X1, line1Y1);
-    // path.lineTo(line1X2, line1Y2);
-    // path.lineTo(line1X3, line1Y3);
-    if (progress == 0 && translateProgress != 0) {
+
+    if (transformProgress == 0 && translateProgress != 0) {
+      /// creating path to center (for tracing wala animation)
       path.moveTo(line1X1, line1Y1);
       path.lineTo(center.dx, center.dy);
     } else {
+      /// creating line 1 path
       path.moveTo(line1X1, line1Y1);
       path.lineTo(line1X2, line1Y2);
       path.lineTo(line1X3, line1Y3);
     }
-    // path.close();
 
     /// trace path animation
     PathMetric pathMetric = path.computeMetrics().first;
-    print("$pathMetric");
-    // Path extractPath =
-    //     pathMetric.extractPath(0.0, pathMetric.length * progress);
-    //print("----$extractPath");
-    if (progress == 0 && translateProgress != 0) {
+
+    if (transformProgress == 0 && translateProgress != 0) {
+      /// tracing path to center animation
       try {
         Path extractPath =
-            pathMetric.extractPath(0.0, pathMetric.length * translateProgress!);
+            pathMetric.extractPath(0.0, pathMetric.length * translateProgress);
         var metric = extractPath.computeMetrics().first;
-        print("--- circle draw");
         final offset = metric.getTangentForOffset(metric.length)!.position;
         canvas.drawCircle(offset, 3, paint..style = PaintingStyle.fill);
       } catch (e) {
         print("error $e");
       }
     } else {
+      /// drawing line 1 wrt transform progress
       Path extractPath =
-          pathMetric.extractPath(0.0, pathMetric.length * progress);
+          pathMetric.extractPath(0.0, pathMetric.length * transformProgress);
       canvas.drawPath(extractPath, paint);
     }
-    //canvas.drawPath(extractPath, paint);
-    //canvas.drawPath(path, paint);
   }
 
   @override
   bool shouldRepaint(Line1Painter oldDelegate) {
-    return oldDelegate.progress != progress ||
+    return oldDelegate.transformProgress != transformProgress ||
         oldDelegate.translateProgress != translateProgress;
   }
 }
@@ -217,13 +211,13 @@ class Line1Painter extends CustomPainter {
 class Line2Painter extends CustomPainter {
   final double logoWidth;
   final double logoHeight;
-  final double progress;
+  final double transformProgress;
   final double translateProgress;
 
   Line2Painter({
     this.logoWidth = 0,
     this.logoHeight = 0,
-    this.progress = 0,
+    this.transformProgress = 0,
     this.translateProgress = 0,
   });
 
@@ -238,7 +232,7 @@ class Line2Painter extends CustomPainter {
     var path = Path();
     Offset center = Offset(size.width / 2, size.height / 2);
 
-    /// helpers ----------------------------------------
+    /// helper coordinates ----------------------------------------
     double outLineX2 = center.dx + logoWidth / 2;
     double outLineY2 = center.dy - logoWidth / 2;
     double outLineY3 = center.dy - logoWidth / 2 + logoHeight * 1.6 / 3;
@@ -262,10 +256,12 @@ class Line2Painter extends CustomPainter {
     double line2Y5 = line1Y1 + 15;
     double line2X6 = line1X3 - 30;
     double line2Y6 = line2Y5;
-    if (progress == 0 && translateProgress != 0) {
+    if (transformProgress == 0 && translateProgress != 0) {
+      /// creating path to center (for tracing wala animation)
       path.moveTo(line2X1, line2Y1);
       path.lineTo(center.dx, center.dy);
     } else {
+      /// creating line 1 path
       path.moveTo(line2X1, line2Y1);
       path.lineTo(line2X2, line2Y2);
       path.lineTo(line2X3, line2Y3);
@@ -276,10 +272,12 @@ class Line2Painter extends CustomPainter {
 
     /// trace path animation
     PathMetric pathMetric = path.computeMetrics().first;
-    if (progress == 0 && translateProgress != 0) {
+
+    if (transformProgress == 0 && translateProgress != 0) {
+      /// tracing path to center animation
       try {
         Path extractPath =
-            pathMetric.extractPath(0.0, pathMetric.length * translateProgress!);
+            pathMetric.extractPath(0.0, pathMetric.length * translateProgress);
         var metric = extractPath.computeMetrics().first;
         final offset = metric.getTangentForOffset(metric.length)!.position;
         canvas.drawCircle(offset, 3, paint..style = PaintingStyle.fill);
@@ -287,15 +285,16 @@ class Line2Painter extends CustomPainter {
         print("error $e");
       }
     } else {
+      /// drawing line 1 wrt transform progress
       Path extractPath =
-          pathMetric.extractPath(0.0, pathMetric.length * progress);
+          pathMetric.extractPath(0.0, pathMetric.length * transformProgress);
       canvas.drawPath(extractPath, paint);
     }
   }
 
   @override
   bool shouldRepaint(Line2Painter oldDelegate) {
-    return oldDelegate.progress != progress ||
+    return oldDelegate.transformProgress != transformProgress ||
         oldDelegate.translateProgress != translateProgress;
   }
 }
@@ -303,13 +302,13 @@ class Line2Painter extends CustomPainter {
 class Line3Painter extends CustomPainter {
   final double logoWidth;
   final double logoHeight;
-  final double progress;
+  final double transformProgress;
   final double translateProgress;
 
   Line3Painter(
       {this.logoWidth = 0,
       this.logoHeight = 0,
-      this.progress = 0,
+      this.transformProgress = 0,
       this.translateProgress = 0});
 
   @override
@@ -323,7 +322,7 @@ class Line3Painter extends CustomPainter {
     var path = Path();
     Offset center = Offset(size.width / 2, size.height / 2);
 
-    /// helpers ----------------------------------------
+    /// helper coordinates ----------------------------------------
     double outLineX2 = center.dx + logoWidth / 2;
     double outLineY3 = center.dy - logoWidth / 2 + logoHeight * 1.6 / 3;
     double outLineX4 = center.dx;
@@ -350,10 +349,12 @@ class Line3Painter extends CustomPainter {
     double line3X5 = line2X5 + 15;
     double line3Y5 = line2Y5 + 25;
 
-    if (progress == 0 && translateProgress != 0) {
+    if (transformProgress == 0 && translateProgress != 0) {
+      /// creating path to center (for tracing wala animation)
       path.moveTo(line3X5, line3Y5);
       path.lineTo(center.dx, center.dy);
     } else {
+      /// creating line 1 path
       path.moveTo(line3X5, line3Y5);
       path.lineTo(line3X4, line3Y4);
       path.lineTo(line3X2, line3Y3);
@@ -362,10 +363,12 @@ class Line3Painter extends CustomPainter {
 
     /// trace path animation
     PathMetric pathMetric = path.computeMetrics().first;
-    if (progress == 0 && translateProgress != 0) {
+
+    if (transformProgress == 0 && translateProgress != 0) {
+      /// tracing path to center animation
       try {
         Path extractPath =
-            pathMetric.extractPath(0.0, pathMetric.length * translateProgress!);
+            pathMetric.extractPath(0.0, pathMetric.length * translateProgress);
         var metric = extractPath.computeMetrics().first;
         final offset = metric.getTangentForOffset(metric.length)!.position;
         canvas.drawCircle(offset, 3, paint..style = PaintingStyle.fill);
@@ -373,15 +376,16 @@ class Line3Painter extends CustomPainter {
         print("error $e");
       }
     } else {
+      /// drawing line 1 wrt transform progress
       Path extractPath =
-          pathMetric.extractPath(0.0, pathMetric.length * progress);
+          pathMetric.extractPath(0.0, pathMetric.length * transformProgress);
       canvas.drawPath(extractPath, paint);
     }
   }
 
   @override
   bool shouldRepaint(Line3Painter oldDelegate) {
-    return oldDelegate.progress != progress ||
+    return oldDelegate.transformProgress != transformProgress ||
         oldDelegate.translateProgress != translateProgress;
   }
 }
