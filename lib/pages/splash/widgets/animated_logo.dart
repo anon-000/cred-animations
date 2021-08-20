@@ -1,5 +1,5 @@
 import 'dart:ui';
-
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 ///
@@ -451,6 +451,10 @@ class CenterDotPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
+    /// update radius
+    double varRadius = radius + translateProgress * 4;
+    print("$radius :::: $varRadius");
+
     Offset center = Offset(size.width / 2, size.height / 2);
 
     /// helper coordinates -----------------------------------
@@ -469,18 +473,74 @@ class CenterDotPainter extends CustomPainter {
     double dot1X1 = center.dx;
     double dot1Y1 = center.dy;
     canvas.drawCircle(
-        Offset(dot1X1, dot1Y1), radius, paint..style = PaintingStyle.stroke);
+        Offset(dot1X1, dot1Y1), varRadius, paint..style = PaintingStyle.stroke);
 
-    double circleEdgePointX1 = center.dx;
-    double circleEdgePointY1 = center.dy;
-    double circleEdgePointX2 = center.dx;
-    double circleEdgePointY2 = center.dy;
-    double circleEdgePointX3 = center.dx;
-    double circleEdgePointY3 = center.dy;
-    double circleEdgePointX4 = center.dx;
-    double circleEdgePointY4 = center.dy;
-    double circleEdgePointX5 = center.dx;
-    double circleEdgePointY5 = center.dy;
+    /// calculating the fookiinnnn shortest distance from circle edge to ends
+    /// you wannntt me ???
+    /// I want you babyyy
+    /// My sugarboo, I'm levitating
+    /// yayyyiiiii yayyiiii yayiiiiii yeahhhhhhh .... i got you my moonnlighttt
+    double edgeToP1Dist = math.sqrt(math.pow((outLineX1 - center.dx), 2) +
+            math.pow((outLineY1 - center.dy), 2)) -
+        varRadius;
+    double edgeToP2Dist = math.sqrt(math.pow((outLineX2 - center.dx), 2) +
+            math.pow((outLineY2 - center.dy), 2)) -
+        varRadius;
+    double edgeToP3Dist = math.sqrt(math.pow((outLineX3 - center.dx), 2) +
+            math.pow((outLineY3 - center.dy), 2)) -
+        varRadius;
+    double edgeToP4Dist = math.sqrt(math.pow((outLineX4 - center.dx), 2) +
+            math.pow((outLineY4 - center.dy), 2)) -
+        varRadius;
+    double edgeToP5Dist = math.sqrt(math.pow((outLineX5 - center.dx), 2) +
+            math.pow((outLineY5 - center.dy), 2)) -
+        varRadius;
+
+    /// Now we have the ratio of that the fookiinnnn edge point with end point and center m:n ratio ( n = radius)
+    double circleEdgePointX1 =
+        (edgeToP1Dist * center.dx + varRadius * outLineX1) /
+            (edgeToP1Dist + varRadius);
+    double circleEdgePointY1 =
+        (edgeToP1Dist * center.dy + varRadius * outLineY1) /
+            (edgeToP1Dist + varRadius);
+    double circleEdgePointX2 =
+        (edgeToP2Dist * center.dx + varRadius * outLineX2) /
+            (edgeToP2Dist + varRadius);
+    double circleEdgePointY2 =
+        (edgeToP2Dist * center.dy + varRadius * outLineY2) /
+            (edgeToP2Dist + varRadius);
+    double circleEdgePointX3 =
+        (edgeToP3Dist * center.dx + varRadius * outLineX3) /
+            (edgeToP3Dist + varRadius);
+    double circleEdgePointY3 =
+        (edgeToP3Dist * center.dy + varRadius * outLineY3) /
+            (edgeToP3Dist + varRadius);
+    double circleEdgePointX4 =
+        (edgeToP4Dist * center.dx + varRadius * outLineX4) /
+            (edgeToP4Dist + varRadius);
+    double circleEdgePointY4 =
+        (edgeToP4Dist * center.dy + varRadius * outLineY4) /
+            (edgeToP4Dist + varRadius);
+    double circleEdgePointX5 =
+        (edgeToP5Dist * center.dx + varRadius * outLineX5) /
+            (edgeToP5Dist + varRadius);
+    double circleEdgePointY5 =
+        (edgeToP5Dist * center.dy + varRadius * outLineY5) /
+            (edgeToP5Dist + varRadius);
+
+    // canvas.drawCircle(
+    //     Offset(circleEdgePointX1, circleEdgePointY1), 2, paint);
+
+    // double circleEdgePointX1 = center.dx;
+    // double circleEdgePointY1 = center.dy;
+    // double circleEdgePointX2 = center.dx;
+    // double circleEdgePointY2 = center.dy;
+    // double circleEdgePointX3 = center.dx;
+    // double circleEdgePointY3 = center.dy;
+    // double circleEdgePointX4 = center.dx;
+    // double circleEdgePointY4 = center.dy;
+    // double circleEdgePointX5 = center.dx;
+    // double circleEdgePointY5 = center.dy;
 
     var path_1 = Path();
     var path_2 = Path();
